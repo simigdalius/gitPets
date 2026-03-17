@@ -49,29 +49,35 @@ def generate_pet():
 
     score = get_activity_score(username)
 
-    # 1. ΕΔΩ ΟΡΙΖΟΥΜΕ ΤΑ ΚΕΙΜΕΝΑ (Αυτό που έλειπε!)
+    # 1. Η ΛΟΓΙΚΗ ΜΑΣ: Τώρα διαλέγει ΚΑΙ το σωστό GIF!
     if score > 20:
-        status_text = "Super Happy! "
+        status_text = "Super Happy!"
         bg_color = "#4CAF50" # Πράσινο
+        gif_path = "happy.gif"
     elif score > 5:
-        status_text = "Doing OK! "
+        status_text = "Doing OK!"
         bg_color = "#FFC107" # Κίτρινο
+        gif_path = "ok.gif"  # Όταν φτιάξεις το ok.gif, θα το βάλεις στον φάκελο!
     else:
-        status_text = "Hungry and Sad... "
+        status_text = "Hungry and Sad..."
         bg_color = "#F44336" # Κόκκινο
+        gif_path = "sad.gif" # Εδώ φορτώνει το νέο σου animation!
 
-    # 2. Φορτώνουμε το GIF (πρέπει το happy.gif να είναι στον ίδιο φάκελο)
+    # 2. Φορτώνουμε το GIF σε Base64
     gif_base64 = ""
-    gif_path = "happy.gif"
     
     if os.path.exists(gif_path):
         with open(gif_path, "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
             gif_base64 = f"data:image/gif;base64,{encoded_string}"
     else:
-        print(f"--- ΠΡΟΣΟΧΗ: Δεν βρέθηκε το αρχείο {gif_path} στον φάκελο! ---")
+        fallback_path = "ok.gif"
+        if os.path.exists(fallback_path):
+            with open(fallback_path, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                gif_base64 = f"data:image/gif;base64,{encoded_string}"
 
-    # 3. Το νέο μας SVG: Ρετρό Κονσόλα / Tamagotchi Συσκευή!
+    # 3. Το SVG της Ρετρό Κονσόλας
     svg_image = f"""
     <svg width="300" height="380" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -92,7 +98,6 @@ def generate_pet():
         </defs>
 
         <rect width="300" height="380" fill="url(#plastic-shell)" rx="45" filter="url(#drop-shadow)" stroke="#d3c5e0" stroke-width="2" />
-        
         <path d="M 20 45 Q 150 10 280 45 L 280 70 Q 150 35 20 70 Z" fill="#ffffff" fill-opacity="0.1" />
 
         <rect x="25" y="40" width="250" height="220" fill="#1a1c23" rx="15" filter="url(#drop-shadow)" />
