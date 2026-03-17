@@ -1,12 +1,12 @@
 import requests
+import base64
+import os
 from flask import Flask, request, Response
-# ΝΕΟ: Εισάγουμε τα εργαλεία για τον χρόνο!
 from datetime import datetime, timedelta, timezone
 
 app = Flask(__name__)
 
 def get_activity_score(username):
-    # Προσθέσαμε το ?per_page=100 για να τραβάει 100 events, ώστε να είμαστε σίγουροι ότι πιάνει όλη την εβδομάδα!
     url = f"https://api.github.com/users/{username}/events/public?per_page=100"
     response = requests.get(url)
     
@@ -15,23 +15,15 @@ def get_activity_score(username):
         
     events = response.json()
     score = 0
-    
-    # 1. Βρίσκουμε την τωρινή ώρα και αφαιρούμε 7 μέρες
     now = datetime.now(timezone.utc)
     one_week_ago = now - timedelta(days=7)
     
     for event in events:
-        # 2. Διαβάζουμε την ημερομηνία που έγινε το event στο GitHub
         created_at_str = event['created_at']
-        
-        # Την μετατρέπουμε από κείμενο σε πραγματικό "Χρόνο" που καταλαβαίνει η Python
         event_date = datetime.strptime(created_at_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
         
-        # 3. Ελέγχουμε: Έγινε αυτό το event μετά από την προηγούμενη εβδομάδα;
         if event_date >= one_week_ago:
-            # Αν ΝΑΙ, τότε δίνουμε τους πόντους κανονικά!
             event_type = event['type']
-            
             if event_type == 'PushEvent':
                 score += event['payload'].get('size', 1) * 2  
             elif event_type == 'PullRequestEvent':
@@ -46,7 +38,6 @@ def get_activity_score(username):
                 score += 1
             else:
                 score += 1
-                
     return score
 
 @app.route('/api')
@@ -58,6 +49,7 @@ def generate_pet():
 
     score = get_activity_score(username)
 
+    # 1. ΕΔΩ ΟΡΙΖΟΥΜΕ ΤΑ ΚΕΙΜΕΝΑ (Αυτό που έλειπε!)
     if score > 20:
         status_text = "Super Happy! "
         bg_color = "#4CAF50" # Πράσινο
@@ -68,18 +60,64 @@ def generate_pet():
         status_text = "Hungry and Sad... "
         bg_color = "#F44336" # Κόκκινο
 
-    # Αλλάξαμε το κείμενο σε "Weekly Score" για να είναι ξεκάθαρο!
+    # 2. Φορτώνουμε το GIF (πρέπει το happy.gif να είναι στον ίδιο φάκελο)
+    gif_base64 = ""
+    gif_path = "happy.gif"
+    
+    if os.path.exists(gif_path):
+        with open(gif_path, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+            gif_base64 = f"data:image/gif;base64,{encoded_string}"
+    else:
+        print(f"--- ΠΡΟΣΟΧΗ: Δεν βρέθηκε το αρχείο {gif_path} στον φάκελο! ---")
+
+    # 3. Το νέο μας SVG: Ρετρό Κονσόλα / Tamagotchi Συσκευή!
     svg_image = f"""
-    <svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100%" height="100%" fill="{bg_color}" rx="15" />
-        <text x="50%" y="40%" font-family="Arial" font-size="24" fill="white" text-anchor="middle">
-            {username}'s Pet
+    <svg width="300" height="380" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="plastic-shell" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#b8a4c9" />
+                <stop offset="100%" stop-color="#594b6d" />
+            </linearGradient>
+
+            <linearGradient id="screen-bg" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#0f2027" />
+                <stop offset="50%" stop-color="#203a43" />
+                <stop offset="100%" stop-color="#2c5364" />
+            </linearGradient>
+
+            <filter id="drop-shadow">
+                <feDropShadow dx="0" dy="6" stdDeviation="4" flood-color="#000000" flood-opacity="0.4"/>
+            </filter>
+        </defs>
+
+        <rect width="300" height="380" fill="url(#plastic-shell)" rx="45" filter="url(#drop-shadow)" stroke="#d3c5e0" stroke-width="2" />
+        
+        <path d="M 20 45 Q 150 10 280 45 L 280 70 Q 150 35 20 70 Z" fill="#ffffff" fill-opacity="0.1" />
+
+        <rect x="25" y="40" width="250" height="220" fill="#1a1c23" rx="15" filter="url(#drop-shadow)" />
+        <rect x="35" y="50" width="230" height="200" fill="url(#screen-bg)" rx="8" />
+
+        <circle cx="80" cy="315" r="16" fill="#ff7eb3" filter="url(#drop-shadow)" stroke="#d85a8d" stroke-width="2"/>
+        <circle cx="150" cy="330" r="16" fill="#ff7eb3" filter="url(#drop-shadow)" stroke="#d85a8d" stroke-width="2"/>
+        <circle cx="220" cy="315" r="16" fill="#ff7eb3" filter="url(#drop-shadow)" stroke="#d85a8d" stroke-width="2"/>
+
+        <text x="80" y="285" font-family="'Courier New', monospace" font-size="10" fill="#ffffff" fill-opacity="0.5" text-anchor="middle">FEED</text>
+        <text x="150" y="300" font-family="'Courier New', monospace" font-size="10" fill="#ffffff" fill-opacity="0.5" text-anchor="middle">PLAY</text>
+        <text x="220" y="285" font-family="'Courier New', monospace" font-size="10" fill="#ffffff" fill-opacity="0.5" text-anchor="middle">CLEAN</text>
+
+        <image x="100" y="60" width="100" height="100" href="{gif_base64}" />
+        
+        <text x="50%" y="185" font-family="'Courier New', monospace" font-weight="bold" font-size="15" fill="#00ffcc" text-anchor="middle">
+            @{username}
         </text>
-        <text x="50%" y="60%" font-family="Arial" font-size="20" fill="white" text-anchor="middle">
-            Weekly Score: {score}
+        
+        <text x="50%" y="210" font-family="'Courier New', monospace" font-size="13" fill="#ffffff" text-anchor="middle">
+            LVL/SCORE: <tspan fill="#ffeb3b" font-weight="bold">{score}</tspan>
         </text>
-        <text x="50%" y="80%" font-family="Arial" font-size="22" fill="white" text-anchor="middle">
-            {status_text}
+        
+        <text x="50%" y="235" font-family="'Courier New', monospace" font-weight="bold" font-size="12" fill="{bg_color}" text-anchor="middle">
+            > {status_text}_
         </text>
     </svg>
     """
