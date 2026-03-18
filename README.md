@@ -33,5 +33,5 @@ The API fetches your public events from the last **7 days** and calculates an **
 ## 💻 How to add it to your Profile
 To display your own GitPet on your GitHub Profile README, add the following markdown line:
 
-```markdown
-![My GitPet](https://gitpets.onrender.com/api?username=YOUR_USERNAME&petname=YOUR_CHOICE)
+```
+markdown![My GitPet](https://gitpets.onrender.com/api?username=simigdalius&petname=molly&v=1)
