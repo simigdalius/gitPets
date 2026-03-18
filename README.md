@@ -25,8 +25,13 @@ The API fetches your public events from the last **7 days** and calculates an **
 * **Pixel Art & GIFs:** Custom animations for the pet's states (Happy, OK, Sad).
 * **Render:** For cloud hosting and deployment.
 
+## choose your pet
+* **molly** cat
+* **spot:** beagle
+* **tobby** pug
+
 ## 💻 How to add it to your Profile
 To display your own GitPet on your GitHub Profile README, add the following markdown line:
 
 ```markdown
-![My GitPet](https://gitpets.onrender.com/api?username=YOUR_USERNAME)
+![My GitPet](https://gitpets.onrender.com/api?username=YOUR_USERNAME&petname=YOUR_CHOICE)
