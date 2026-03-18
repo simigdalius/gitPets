@@ -40,28 +40,55 @@ def get_activity_score(username):
                 score += 1
     return score
 
+def get_pet(petname,mood ):
+    petmood = {1:"happy", 2:"ok", 3: "sad"}
+    #gia na fouleuei prepei na onomazw ta arxeia ws ekseis molly_happy.gif
+    filename = f"{petname}_{petmood[mood]}.gif"
+    #na gurnaei sto default an den uparxei onoma gia thn wra molly
+    if not os.path.exists(filename):
+        return f"{petmood[mood]}.gif"
+    return filename
+
+
+
 @app.route('/api')
 def generate_pet():
     username = request.args.get('username')
+    petname = request.args.get('petname', 'molly').lower()
 
     if not username:
         username = "Unknown"
 
+
+    #auto einai to antistoixw mapping gia na diaxeiristw xrwma konsolas
+    pet_styles = {
+        "molly": ["#b8a4c9", "#594b6d", "#ff7eb3"],  # Μωβ/Ροζ (Το κλασικό σου)
+        "spot": ["#7ec8ff", "#3a5f85", "#4fc3f7"],  # Μπλε στυλ
+        "default": ["#0eac13", "#594b6d", "#5eff00"] # Αν δεν βρει το όνομα
+    }
+
+    style = pet_styles.get(petname, pet_styles["default"])
+    color_top = style[0]
+    color_bottom = style[1]
+    color_buttons = style[2]
+    
     score = get_activity_score(username)
 
     # 1. Η ΛΟΓΙΚΗ ΜΑΣ: Τώρα διαλέγει ΚΑΙ το σωστό GIF!
     if score > 20:
         status_text = "Super Happy!"
-        bg_color = "#4CAF50" # Πράσινο
-        gif_path = "happy.gif"
+        bg_color = "#4CAF50" 
+        mood_id = 1
     elif score > 5:
         status_text = "Doing OK!"
-        bg_color = "#FFC107" # Κίτρινο
-        gif_path = "ok.gif"  # Όταν φτιάξεις το ok.gif, θα το βάλεις στον φάκελο!
+        bg_color = "#FFC107" 
+        mood_id = 2
     else:
         status_text = "Hungry and Sad..."
-        bg_color = "#F44336" # Κόκκινο
-        gif_path = "sad.gif" # Εδώ φορτώνει το νέο σου animation!
+        bg_color = "#F44336" 
+        mood_id = 3
+    
+    gif_path = get_pet(petname,mood_id)
 
     # 2. Φορτώνουμε το GIF σε Base64
     gif_base64 = ""
@@ -82,10 +109,11 @@ def generate_pet():
     <svg width="300" height="380" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <linearGradient id="plastic-shell" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#b8a4c9" />
-                <stop offset="100%" stop-color="#594b6d" />
+                <stop offset="0%" stop-color="{color_top}" />
+                <stop offset="100%" stop-color="{color_bottom}" />
             </linearGradient>
 
+            
             <linearGradient id="screen-bg" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stop-color="#0f2027" />
                 <stop offset="50%" stop-color="#203a43" />
@@ -95,35 +123,22 @@ def generate_pet():
             <filter id="drop-shadow">
                 <feDropShadow dx="0" dy="6" stdDeviation="4" flood-color="#000000" flood-opacity="0.4"/>
             </filter>
-        </defs>
+            </defs>
 
-        <rect width="300" height="380" fill="url(#plastic-shell)" rx="45" filter="url(#drop-shadow)" stroke="#d3c5e0" stroke-width="2" />
-        <path d="M 20 45 Q 150 10 280 45 L 280 70 Q 150 35 20 70 Z" fill="#ffffff" fill-opacity="0.1" />
-
-        <rect x="25" y="40" width="250" height="220" fill="#1a1c23" rx="15" filter="url(#drop-shadow)" />
+        <rect width="300" height="380" fill="url(#plastic-shell)" rx="45" stroke="#ffffff" stroke-opacity="0.2" stroke-width="2" />
+        
+        <rect x="25" y="40" width="250" height="220" fill="#1a1c23" rx="15" />
         <rect x="35" y="50" width="230" height="200" fill="url(#screen-bg)" rx="8" />
 
-        <circle cx="80" cy="315" r="16" fill="#ff7eb3" filter="url(#drop-shadow)" stroke="#d85a8d" stroke-width="2"/>
-        <circle cx="150" cy="330" r="16" fill="#ff7eb3" filter="url(#drop-shadow)" stroke="#d85a8d" stroke-width="2"/>
-        <circle cx="220" cy="315" r="16" fill="#ff7eb3" filter="url(#drop-shadow)" stroke="#d85a8d" stroke-width="2"/>
+        <image x="100" y="65" width="100" height="100" href="{gif_base64}" />
+        
+        <circle cx="80" cy="315" r="16" fill="{color_buttons}" />
+        <circle cx="150" cy="330" r="16" fill="{color_buttons}" />
+        <circle cx="220" cy="315" r="16" fill="{color_buttons}" />
 
-        <text x="80" y="285" font-family="'Courier New', monospace" font-size="10" fill="#ffffff" fill-opacity="0.5" text-anchor="middle">FEED</text>
-        <text x="150" y="300" font-family="'Courier New', monospace" font-size="10" fill="#ffffff" fill-opacity="0.5" text-anchor="middle">PLAY</text>
-        <text x="220" y="285" font-family="'Courier New', monospace" font-size="10" fill="#ffffff" fill-opacity="0.5" text-anchor="middle">CLEAN</text>
-
-        <image x="100" y="60" width="100" height="100" href="{gif_base64}" />
-        
-        <text x="50%" y="185" font-family="'Courier New', monospace" font-weight="bold" font-size="15" fill="#00ffcc" text-anchor="middle">
-            @{username}
-        </text>
-        
-        <text x="50%" y="210" font-family="'Courier New', monospace" font-size="13" fill="#ffffff" text-anchor="middle">
-            LVL/SCORE: <tspan fill="#ffeb3b" font-weight="bold">{score}</tspan>
-        </text>
-        
-        <text x="50%" y="235" font-family="'Courier New', monospace" font-weight="bold" font-size="12" fill="{bg_color}" text-anchor="middle">
-            > {status_text}_
-        </text>
+        <text x="50%" y="185" font-family="'Courier New', monospace" font-weight="bold" font-size="15" fill="#00ffcc" text-anchor="middle">@{username}</text>
+        <text x="50%" y="210" font-family="'Courier New', monospace" font-size="11" fill="#ffffff" text-anchor="middle">TYPE: {petname.upper()} | SCORE: {score}</text>
+        <text x="50%" y="235" font-family="'Courier New', monospace" font-weight="bold" font-size="12" fill="{bg_color}" text-anchor="middle">> {status_text}_</text>
     </svg>
     """
 
