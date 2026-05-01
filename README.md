@@ -12,13 +12,13 @@
 
 
 
-## 🎯 The Motivation
+## The Motivation
 Coding every day can be tough. **GitPets** uses "gamification" to give you that extra push:
 * **High Activity:** Your pet is glowing, happy, and full of energy! 🌟
 * **Low Activity:** Your pet starts to get hungry and sad. 🦴
 * **The Goal:** Don't let your pet down! Keep pushing code to keep it happy.
 
-## 🚀 How it Works (Scoring System)
+## How it Works (Scoring System)
 The API fetches your public events from the last **7 days** and calculates an **Activity Score**:
 * **Pull Requests & Merges:** +5 points 🍕
 * **Code Reviews:** +4 points
@@ -26,7 +26,7 @@ The API fetches your public events from the last **7 days** and calculates an **
 * **Commits (Push):** +2 points per commit 🍬
 * **Forks & Deletions:** +1 point
 
-## 🛠️ Built With
+## Built With
 * **Python & Flask:** The engine that runs the API.
 * **GitHub API:** To fetch real-time user activity.
 * **SVG & CSS:** To render the retro console UI dynamically.
@@ -35,7 +35,7 @@ The API fetches your public events from the last **7 days** and calculates an **
 
 ## choose your pet
 * **molly** cat
-* **spot:** beagle
+* **spot:** beagle 
 * **tobby** pug
 
 ## 💻 How to add it to your Profile
