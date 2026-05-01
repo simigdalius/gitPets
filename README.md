@@ -1,5 +1,5 @@
 # 👾 GitPets: Your GitHub Tamagotchi
-
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 **GitPets** is a dynamic, gamified widget designed to turn your coding consistency into a survival game! It tracks your GitHub activity over the last 7 days and reflects your productivity through a retro-style digital pet.
 
 
